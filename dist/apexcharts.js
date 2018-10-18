@@ -2941,6 +2941,13 @@ var Dimensions = function () {
 
       gl.gridWidth = gl.gridWidth - w.config.grid.padding.left - w.config.grid.padding.right;
 
+      console.log(w);
+
+      if (w.config.yaxis && w.config.yaxis[0].bothSide) {
+        console.log('alo');
+        gl.gridWidth -= yaxisLabelCoords[0].width;
+      }
+
       gl.translateX = gl.translateX + w.config.grid.padding.left;
       gl.translateY = gl.translateY + w.config.grid.padding.top;
 
@@ -3013,6 +3020,10 @@ var Dimensions = function () {
         if (!w.globals.ignoreYAxisIndexes.includes(index) && !w.config.yaxis[index].floating) {
           if (yaxe.opposite) {
             w.globals.translateX = w.globals.translateX - (yaxisLabelCoords[index].width + ytitleCoords[index].width) - parseInt(w.config.yaxis[index].labels.style.fontSize) / 1.2 - 12;
+          }
+
+          if (yaxe.bothSide) {
+            w.globals.translateX = w.globals.translateX - (yaxisLabelCoords[index].width + ytitleCoords[index].width) - parseInt(w.config.yaxis[index].labels.style.fontSize) / 1.2 + yaxisLabelCoords[index].width;
           }
         }
       });
@@ -5491,15 +5502,20 @@ var YAxis = function () {
 
       var elYaxis = graphics.group({
         class: 'apexcharts-yaxis',
-        'rel': realIndex,
-        'transform': 'translate(' + w.globals.translateYAxisX[realIndex] + ', 0)'
+        rel: realIndex,
+        transform: 'translate(' + w.globals.translateYAxisX[realIndex] + ', 0)'
       });
 
       var elYaxisTexts = graphics.group({
-        'class': 'apexcharts-yaxis-texts-g'
+        class: 'apexcharts-yaxis-texts-g'
+      });
+
+      var elYaxisTextsSecond = graphics.group({
+        class: 'apexcharts-yaxis-texts-g apexcharts-yaxis-texts-g-second'
       });
 
       elYaxis.add(elYaxisTexts);
+      elYaxis.add(elYaxisTextsSecond);
 
       var tickAmount = w.globals.yAxisScale[realIndex].result.length - 1;
 
@@ -5513,6 +5529,8 @@ var YAxis = function () {
       if (w.config.yaxis[realIndex].labels.show) {
         for (var i = tickAmount; i >= 0; i--) {
           var val = w.globals.yAxisScale[realIndex].result[i];
+          var bothSide = w.config.yaxis[realIndex].bothSide;
+          var textAnchor = w.config.yaxis[realIndex].opposite ? 'start' : 'end';
 
           val = lbFormatter(val);
 
@@ -5529,19 +5547,32 @@ var YAxis = function () {
             x: xPad,
             y: l + tickAmount / 10 + w.config.yaxis[realIndex].labels.offsetY + 1,
             text: val,
-            textAnchor: w.config.yaxis[realIndex].opposite ? 'start' : 'end',
+            textAnchor: textAnchor,
             fontSize: yaxisFontSize,
             foreColor: w.config.yaxis[realIndex].labels.style.color,
             cssClass: 'apexcharts-yaxis-label ' + w.config.yaxis[realIndex].labels.style.cssClass
           });
           elYaxisTexts.add(label);
+
+          if (bothSide) {
+            var _label = graphics.drawText({
+              x: xPad + w.globals.gridWidth + 50,
+              y: l + tickAmount / 10 + w.config.yaxis[realIndex].labels.offsetY + 1,
+              text: val,
+              textAnchor: textAnchor === 'start' ? 'start' : 'end',
+              fontSize: yaxisFontSize,
+              foreColor: w.config.yaxis[realIndex].labels.style.color,
+              cssClass: 'apexcharts-yaxis-label ' + w.config.yaxis[realIndex].labels.style.cssClass
+            });
+            elYaxisTexts.add(_label);
+          }
           l = l + labelsDivider;
         }
       }
 
       if (w.config.yaxis[realIndex].title.text !== undefined) {
         var elYaxisTitle = graphics.group({
-          'class': 'apexcharts-yaxis-title'
+          class: 'apexcharts-yaxis-title'
         });
 
         var x = 0;
@@ -5589,12 +5620,12 @@ var YAxis = function () {
       var graphics = new _Graphics2.default(this.ctx);
 
       var elXaxis = graphics.group({
-        'class': 'apexcharts-xaxis apexcharts-yaxis-inversed'
+        class: 'apexcharts-xaxis apexcharts-yaxis-inversed'
       });
 
       var elXaxisTexts = graphics.group({
-        'class': 'apexcharts-xaxis-texts-g',
-        'transform': 'translate(' + w.globals.translateXAxisX + ', ' + w.globals.translateXAxisY + ')'
+        class: 'apexcharts-xaxis-texts-g',
+        transform: 'translate(' + w.globals.translateXAxisX + ', ' + w.globals.translateXAxisY + ')'
       });
 
       elXaxis.add(elXaxisTexts);
@@ -5637,7 +5668,7 @@ var YAxis = function () {
 
       if (w.config.xaxis.title.text !== undefined) {
         var elYaxisTitle = graphics.group({
-          'class': 'apexcharts-xaxis-title apexcharts-yaxis-title-inversed'
+          class: 'apexcharts-xaxis-title apexcharts-yaxis-title-inversed'
         });
 
         var elYAxisTitleText = graphics.drawText({
@@ -22480,9 +22511,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   // Svg support test
   SVG.supported = function () {
-    return true;
-    // !!document.createElementNS &&
-    //     !! document.createElementNS(SVG.ns,'svg').createSVGRect
+    return !!document.createElementNS && !!document.createElementNS(SVG.ns, 'svg').createSVGRect;
   }();
 
   // Don't bother to continue if SVG is not supported

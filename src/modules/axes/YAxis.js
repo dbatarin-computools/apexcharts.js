@@ -12,8 +12,10 @@ class YAxis {
     this.w = ctx.w
 
     this.xaxisFontSize = this.w.config.xaxis.labels.style.fontSize
-    this.isBarHorizontal = !!(this.w.config.chart.type === 'bar' &&
-      this.w.config.plotOptions.bar.horizontal)
+    this.isBarHorizontal = !!(
+      this.w.config.chart.type === 'bar' &&
+      this.w.config.plotOptions.bar.horizontal
+    )
 
     this.xaxisForeColors = this.w.config.xaxis.labels.style.colors
 
@@ -31,16 +33,20 @@ class YAxis {
 
     let elYaxis = graphics.group({
       class: 'apexcharts-yaxis',
-      'rel': realIndex,
-      'transform':
-      'translate(' + w.globals.translateYAxisX[realIndex] + ', 0)'
+      rel: realIndex,
+      transform: 'translate(' + w.globals.translateYAxisX[realIndex] + ', 0)'
     })
 
     let elYaxisTexts = graphics.group({
-      'class': 'apexcharts-yaxis-texts-g'
+      class: 'apexcharts-yaxis-texts-g'
+    })
+
+    let elYaxisTextsSecond = graphics.group({
+      class: 'apexcharts-yaxis-texts-g apexcharts-yaxis-texts-g-second'
     })
 
     elYaxis.add(elYaxisTexts)
+    elYaxis.add(elYaxisTextsSecond)
 
     let tickAmount = w.globals.yAxisScale[realIndex].result.length - 1
 
@@ -54,6 +60,8 @@ class YAxis {
     if (w.config.yaxis[realIndex].labels.show) {
       for (let i = tickAmount; i >= 0; i--) {
         let val = w.globals.yAxisScale[realIndex].result[i]
+        let bothSide = w.config.yaxis[realIndex].bothSide
+        let textAnchor = w.config.yaxis[realIndex].opposite ? 'start' : 'end'
 
         val = lbFormatter(val)
 
@@ -70,19 +78,40 @@ class YAxis {
           x: xPad,
           y: l + tickAmount / 10 + w.config.yaxis[realIndex].labels.offsetY + 1,
           text: val,
-          textAnchor: w.config.yaxis[realIndex].opposite ? 'start' : 'end',
+          textAnchor,
           fontSize: yaxisFontSize,
           foreColor: w.config.yaxis[realIndex].labels.style.color,
-          cssClass: 'apexcharts-yaxis-label ' + w.config.yaxis[realIndex].labels.style.cssClass
+          cssClass:
+            'apexcharts-yaxis-label ' +
+            w.config.yaxis[realIndex].labels.style.cssClass
         })
         elYaxisTexts.add(label)
+
+        if (bothSide) {
+          let label = graphics.drawText({
+            x: xPad + w.globals.gridWidth + 50,
+            y:
+              l +
+              tickAmount / 10 +
+              w.config.yaxis[realIndex].labels.offsetY +
+              1,
+            text: val,
+            textAnchor: textAnchor === 'start' ? 'start' : 'end',
+            fontSize: yaxisFontSize,
+            foreColor: w.config.yaxis[realIndex].labels.style.color,
+            cssClass:
+              'apexcharts-yaxis-label ' +
+              w.config.yaxis[realIndex].labels.style.cssClass
+          })
+          elYaxisTexts.add(label)
+        }
         l = l + labelsDivider
       }
     }
 
     if (w.config.yaxis[realIndex].title.text !== undefined) {
       let elYaxisTitle = graphics.group({
-        'class': 'apexcharts-yaxis-title'
+        class: 'apexcharts-yaxis-title'
       })
 
       let x = 0
@@ -91,12 +120,14 @@ class YAxis {
       }
       let elYAxisTitleText = graphics.drawText({
         x,
-        y: (w.globals.gridHeight / 2) + w.globals.translateY,
+        y: w.globals.gridHeight / 2 + w.globals.translateY,
         text: w.config.yaxis[realIndex].title.text,
         textAnchor: 'end',
         foreColor: w.config.yaxis[realIndex].labels.style.color,
         fontSize: w.config.yaxis[realIndex].title.style.fontSize,
-        cssClass: 'apexcharts-yaxis-title-text ' + w.config.yaxis[realIndex].title.style.cssClass
+        cssClass:
+          'apexcharts-yaxis-title-text ' +
+          w.config.yaxis[realIndex].title.style.cssClass
       })
 
       elYaxisTitle.add(elYAxisTitleText)
@@ -121,7 +152,15 @@ class YAxis {
 
       elYaxis.add(elVerticalLine)
 
-      this.drawAxisTicks(x, tickAmount, axisBorder, w.config.yaxis[realIndex].axisTicks, realIndex, labelsDivider, elYaxis)
+      this.drawAxisTicks(
+        x,
+        tickAmount,
+        axisBorder,
+        w.config.yaxis[realIndex].axisTicks,
+        realIndex,
+        labelsDivider,
+        elYaxis
+      )
     }
 
     return elYaxis
@@ -133,13 +172,14 @@ class YAxis {
     let graphics = new Graphics(this.ctx)
 
     let elXaxis = graphics.group({
-      'class': 'apexcharts-xaxis apexcharts-yaxis-inversed'
+      class: 'apexcharts-xaxis apexcharts-yaxis-inversed'
     })
 
     let elXaxisTexts = graphics.group({
-      'class': 'apexcharts-xaxis-texts-g',
-      'transform':
-      `translate(${w.globals.translateXAxisX}, ${w.globals.translateXAxisY})`
+      class: 'apexcharts-xaxis-texts-g',
+      transform: `translate(${w.globals.translateXAxisX}, ${
+        w.globals.translateXAxisY
+      })`
     })
 
     elXaxis.add(elXaxisTexts)
@@ -159,15 +199,19 @@ class YAxis {
         val = lbFormatter(val)
 
         let elTick = graphics.drawText({
-          x: w.globals.gridWidth +
-          w.globals.padHorizontal -
-          (l - labelsDivider + w.config.xaxis.labels.offsetX),
+          x:
+            w.globals.gridWidth +
+            w.globals.padHorizontal -
+            (l - labelsDivider + w.config.xaxis.labels.offsetX),
           y: this.xAxisoffX + w.config.xaxis.labels.offsetY + 30,
           text: '',
           textAnchor: 'middle',
-          foreColor: Array.isArray(this.xaxisForeColors) ? this.xaxisForeColors[realIndex] : this.xaxisForeColors,
+          foreColor: Array.isArray(this.xaxisForeColors)
+            ? this.xaxisForeColors[realIndex]
+            : this.xaxisForeColors,
           fontSize: this.xaxisFontSize,
-          cssClass: 'apexcharts-xaxis-label ' + w.config.xaxis.labels.style.cssClass
+          cssClass:
+            'apexcharts-xaxis-label ' + w.config.xaxis.labels.style.cssClass
         })
 
         elXaxisTexts.add(elTick)
@@ -184,19 +228,21 @@ class YAxis {
 
     if (w.config.xaxis.title.text !== undefined) {
       let elYaxisTitle = graphics.group({
-        'class': 'apexcharts-xaxis-title apexcharts-yaxis-title-inversed'
+        class: 'apexcharts-xaxis-title apexcharts-yaxis-title-inversed'
       })
 
       let elYAxisTitleText = graphics.drawText({
         x: w.globals.gridWidth / 2,
-        y: this.xAxisoffX +
-        parseInt(this.xaxisFontSize) +
-        parseInt(w.config.xaxis.title.style.fontSize) +
-        20,
+        y:
+          this.xAxisoffX +
+          parseInt(this.xaxisFontSize) +
+          parseInt(w.config.xaxis.title.style.fontSize) +
+          20,
         text: w.config.xaxis.title.text,
         textAnchor: 'middle',
         fontSize: w.config.xaxis.title.style.fontSize,
-        cssClass: 'apexcharts-xaxis-title-text ' + w.config.xaxis.title.style.cssClass
+        cssClass:
+          'apexcharts-xaxis-title-text ' + w.config.xaxis.title.style.cssClass
       })
 
       elYaxisTitle.add(elYAxisTitleText)
@@ -220,7 +266,15 @@ class YAxis {
     return elXaxis
   }
 
-  drawAxisTicks (x, tickAmount, axisBorder, axisTicks, realIndex, labelsDivider, elYaxis) {
+  drawAxisTicks (
+    x,
+    tickAmount,
+    axisBorder,
+    axisTicks,
+    realIndex,
+    labelsDivider,
+    elYaxis
+  ) {
     let w = this.w
     let graphics = new Graphics(this.ctx)
 
@@ -231,7 +285,8 @@ class YAxis {
       if (w.config.yaxis[realIndex].opposite === true) x = x + axisTicks.width
 
       for (let i = tickAmount; i >= 0; i--) {
-        let tY = t + tickAmount / 10 + w.config.yaxis[realIndex].labels.offsetY - 1
+        let tY =
+          t + tickAmount / 10 + w.config.yaxis[realIndex].labels.offsetY - 1
         if (this.isBarHorizontal) {
           tY = labelsDivider * i
         }
@@ -279,11 +334,14 @@ class YAxis {
     }
 
     if (yAxisTitle !== null) {
-      let x = this.xPaddingForYAxisTitle(realIndex, yAxisLabelsCoord, yAxisTitleCoord, yAxisOpposite)
-
-      yAxisTitle.setAttribute(
-        'x', x.xPos - (yAxisOpposite ? 10 : 0)
+      let x = this.xPaddingForYAxisTitle(
+        realIndex,
+        yAxisLabelsCoord,
+        yAxisTitleCoord,
+        yAxisOpposite
       )
+
+      yAxisTitle.setAttribute('x', x.xPos - (yAxisOpposite ? 10 : 0))
     }
 
     if (yAxisTitle !== null) {
@@ -302,15 +360,24 @@ class YAxis {
     }
   }
 
-  xPaddingForYAxisTitle (realIndex, yAxisLabelsCoord, yAxisTitleCoord, yAxisOpposite) {
+  xPaddingForYAxisTitle (
+    realIndex,
+    yAxisLabelsCoord,
+    yAxisTitleCoord,
+    yAxisOpposite
+  ) {
     let w = this.w
     let oppositeAxisCount = 0
 
     let x = 0
     let padd = 20
     if (yAxisOpposite) {
-      x = yAxisLabelsCoord.width +
-      w.config.yaxis[realIndex].title.offsetX + padd + yAxisTitleCoord.width / 2 - 15
+      x =
+        yAxisLabelsCoord.width +
+        w.config.yaxis[realIndex].title.offsetX +
+        padd +
+        yAxisTitleCoord.width / 2 -
+        15
 
       oppositeAxisCount += 1
 
@@ -318,17 +385,23 @@ class YAxis {
         x = x - 15
       }
     } else {
-      x = yAxisLabelsCoord.width * -1 +
-          w.config.yaxis[realIndex].title.offsetX + padd + yAxisTitleCoord.width / 2 - 15
+      x =
+        yAxisLabelsCoord.width * -1 +
+        w.config.yaxis[realIndex].title.offsetX +
+        padd +
+        yAxisTitleCoord.width / 2 -
+        15
 
       if (this.isBarHorizontal) {
         padd = 25
-        x = yAxisLabelsCoord.width * -1 -
-        w.config.yaxis[realIndex].title.offsetX - padd
+        x =
+          yAxisLabelsCoord.width * -1 -
+          w.config.yaxis[realIndex].title.offsetX -
+          padd
       }
     }
 
-    return {xPos: x, padd}
+    return { xPos: x, padd }
   }
 
   // sets the x position of the y-axis by counting the labels width, title width and any offset
@@ -347,13 +420,18 @@ class YAxis {
     }
 
     w.config.yaxis.map((yaxe, index) => {
-      let yAxisWidth = (yaxisLabelCoords[index].width + ytitleCoords[index].width)
+      let yAxisWidth = yaxisLabelCoords[index].width + ytitleCoords[index].width
 
-      let paddingForYAxisTitle = this.xPaddingForYAxisTitle(index, {
-        width: yaxisLabelCoords[index].width
-      }, {
-        width: ytitleCoords[index].width
-      }, yaxe.opposite)
+      let paddingForYAxisTitle = this.xPaddingForYAxisTitle(
+        index,
+        {
+          width: yaxisLabelCoords[index].width
+        },
+        {
+          width: ytitleCoords[index].width
+        },
+        yaxe.opposite
+      )
 
       if (w.config.yaxis.length > 1) {
         // multiple yaxis
@@ -375,18 +453,33 @@ class YAxis {
         }
 
         if (this.multipleYs) {
-          xLeft = w.globals.translateX - yAxisWidth - leftDrawnYs + multipleYPadd + (parseInt(w.config.yaxis[index].labels.style.fontSize) / 1.2) + yaxe.labels.offsetX
+          xLeft =
+            w.globals.translateX -
+            yAxisWidth -
+            leftDrawnYs +
+            multipleYPadd +
+            parseInt(w.config.yaxis[index].labels.style.fontSize) / 1.2 +
+            yaxe.labels.offsetX
         } else {
-          xLeft = w.globals.translateX - yAxisWidth + yaxisLabelCoords[index].width + yaxe.labels.offsetX
+          xLeft =
+            w.globals.translateX -
+            yAxisWidth +
+            yaxisLabelCoords[index].width +
+            yaxe.labels.offsetX
         }
 
         leftDrawnYs = leftDrawnYs + offset
         w.globals.translateYAxisX[index] = xLeft
       } else {
         // right side y axis
-        xRight = w.globals.gridWidth + (w.globals.translateX) + rightDrawnYs + 30 + (w.globals.series.length - w.globals.collapsedSeries.length)
+        xRight =
+          w.globals.gridWidth +
+          w.globals.translateX +
+          rightDrawnYs +
+          30 +
+          (w.globals.series.length - w.globals.collapsedSeries.length)
 
-        w.globals.collapsedSeries.forEach((c) => {
+        w.globals.collapsedSeries.forEach(c => {
           if (c.index === index) {
             rightDrawnYs = rightDrawnYs - yAxisWidth
           }
