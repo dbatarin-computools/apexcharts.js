@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "webpack --watch",
-    "build": "gulp build",
+    "build": "uglifyjs dist/apexcharts.js -o dist/apexcharts.min.js",
     "test": "jest"
   },
   "dependencies": {
@@ -57,6 +57,7 @@
     "puppeteer-core": "^1.7.0",
     "style-loader": "^0.20.2",
     "svg-inline-loader": "^0.8.0",
+    "uglify-js": "^3.4.9",
     "webpack": "^2.2.1"
   },
   "author": {

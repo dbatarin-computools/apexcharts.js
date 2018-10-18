@@ -12,7 +12,7 @@
 
     <style>
         #chart {
-            max-width: 650px;
+            max-width: 850px;
             margin: 35px auto;
         }
     </style>
@@ -28,39 +28,136 @@
     <script src="../assets/stock-prices.js"></script>
 
     <script>
-        var options = {
-            chart: {
-                height: 350,
+
+        const options = {
+            "chart": {
                 type: 'line',
-                zoom: {
-                    enabled: false
+                "toolbar": {
+                    "show": false
+                },
+                "zoom": {
+                    "enabled": true,
+                    "type": "x"
                 }
             },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            series: [{
-                name: "Desktops",
-                data: [30, 41, 35, 51, 49, 62, 69, 91, 126]
-            }],
-            title: {
-                text: 'Product Trends by Month',
-                align: 'left'
-            },
-            grid: {
-                row: {
-                    colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                    opacity: 0.5
+            "xaxis": {
+                "tickAmount": 10,
+                "type": "numeric",
+                "crosshairs": {
+                    "show": false
                 },
+                "tooltip": {
+                    "enabled": false
+                },
+                "labels": {
+                    "style": {
+                        "color": "#888"
+                    }
+                }
             },
-            labels: series.monthDataSeries1.dates,
-            xaxis: {
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+            "yaxis": {
+                "bothSide": true,
+                "min": 1.74,
+                "max": 1.9000000000000001,
+                "labels": {
+                    "style": {
+                        "color": "#888"
+                    }
+                }
             },
-        }
+            "markers": {
+                "size": 0
+            },
+            "tooltip": {
+                "x": {
+
+                }
+            },
+            "legend": {
+                "show": false
+            },
+            "series": [
+                {
+                    "name": "Line 2",
+                    "data": [
+                        {
+                            "x": 0,
+                            "y": 1.85
+                        },
+                        {
+                            "x": 1,
+                            "y": 1.79
+                        },
+                        {
+                            "x": 2,
+                            "y": 1.8
+                        },
+                        {
+                            "x": 3,
+                            "y": 1.84
+                        },
+                        {
+                            "x": 4,
+                            "y": 1.83
+                        },
+                        {
+                            "x": 5,
+                            "y": 1.81
+                        },
+                        {
+                            "x": 6,
+                            "y": 1.81
+                        }
+                    ]
+                }
+            ],
+        };
+
+        //     "lines": [
+        //         {
+        //             "id": "all",
+        //             "name": "All"
+        //         },
+        //         {
+        //             "id": "2",
+        //             "name": "2"
+        //         }
+        //     ]
+        // }
+
+        // var options = {
+        //     chart: {
+        //         height: 350,
+        //         type: 'line',
+        //         zoom: {
+        //             enabled: false
+        //         }
+        //     },
+        //     dataLabels: {
+        //         enabled: false
+        //     },
+        //     stroke: {
+        //         curve: 'straight'
+        //     },
+        //     series: [{
+        //         name: "Desktops",
+        //         data: [30, 41, 35, 51, 49, 62, 69, 91, 126]
+        //     }],
+        //     title: {
+        //         text: 'Product Trends by Month',
+        //         align: 'left'
+        //     },
+        //     grid: {
+        //         row: {
+        //             colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+        //             opacity: 0.5
+        //         },
+        //     },
+        //     labels: series.monthDataSeries1.dates,
+        //     xaxis: {
+        //         categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+        //     },
+        // }
 
         var chart = new ApexCharts(
             document.querySelector("#chart"),
@@ -68,7 +165,7 @@
         );
 
         chart.render();
-        
+
     </script>
 </body>
 

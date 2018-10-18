@@ -4502,6 +4502,12 @@ var Dimensions = function () {
 
       gl.gridWidth = gl.gridWidth - w.config.grid.padding.left - w.config.grid.padding.right;
 
+      // console.log(w.config.yaxis)
+
+      if (w.config.yaxis && w.config.yaxis[0].bothSide) {
+        gl.gridWidth -= yaxisLabelCoords[0].width;
+      }
+
       gl.translateX = gl.translateX + w.config.grid.padding.left;
       gl.translateY = gl.translateY + w.config.grid.padding.top;
 
@@ -4573,6 +4579,10 @@ var Dimensions = function () {
         if (!w.globals.ignoreYAxisIndexes.indexOf(index) > -1 && !w.config.yaxis[index].floating) {
           if (yaxe.opposite) {
             w.globals.translateX = w.globals.translateX - (yaxisLabelCoords[index].width + yTitleCoords[index].width) - parseInt(w.config.yaxis[index].labels.style.fontSize) / 1.2 - 12;
+          }
+
+          if (yaxe.bothSide) {
+            w.globals.translateX = w.globals.translateX - (yaxisLabelCoords[index].width + yTitleCoords[index].width) - parseInt(w.config.yaxis[index].labels.style.fontSize) / 1.2 + yaxisLabelCoords[index].width;
           }
         }
       });
@@ -5237,12 +5247,14 @@ var XAxis = function () {
 
       if (w.config.xaxis.labels.show) {
         for (var _i = 0; _i <= labelsLen - 1; _i++) {
-          var label = typeof labels[_i] === 'undefined' ? '' : labels[_i];
+          var rawLabel = typeof labels[_i] === 'undefined' ? '' : labels[_i];
+          var label = void 0;
 
           var xFormat = new _Formatters2.default(this.ctx);
-          label = xFormat.xLabelFormat(xlbFormatter, label);
-          if (customFormatter !== undefined && xlbFormatter.toString() !== customFormatter.toString()) {
-            label = customFormatter(label, this.xaxisLabels[_i], _i);
+          label = xFormat.xLabelFormat(xlbFormatter, rawLabel);
+
+          if (customFormatter !== undefined) {
+            label = customFormatter(rawLabel, this.xaxisLabels[_i], _i);
           }
 
           var x = xPos - colWidth / 2 + w.config.xaxis.labels.offsetX;
@@ -5593,13 +5605,15 @@ var YAxis = function () {
       var w = this.w;
       var graphics = new _Graphics2.default(this.ctx);
 
+      console.log(w.globals.gridWidth);
+
       var yaxisFontSize = w.config.yaxis[realIndex].labels.style.fontSize;
       var yaxisFontFamily = w.config.yaxis[realIndex].labels.style.fontFamily;
 
       var elYaxis = graphics.group({
         class: 'apexcharts-yaxis',
-        'rel': realIndex,
-        'transform': 'translate(' + w.globals.translateYAxisX[realIndex] + ', 0)'
+        rel: realIndex,
+        transform: 'translate(' + w.globals.translateYAxisX[realIndex] + ', 0)'
       });
 
       if (!w.config.yaxis[realIndex].show) {
@@ -5607,10 +5621,15 @@ var YAxis = function () {
       }
 
       var elYaxisTexts = graphics.group({
-        'class': 'apexcharts-yaxis-texts-g'
+        class: 'apexcharts-yaxis-texts-g'
+      });
+
+      var elYaxisTextsSecond = graphics.group({
+        class: 'apexcharts-yaxis-texts-g apexcharts-yaxis-texts-g-second'
       });
 
       elYaxis.add(elYaxisTexts);
+      elYaxis.add(elYaxisTextsSecond);
 
       var tickAmount = w.globals.yAxisScale[realIndex].result.length - 1;
 
@@ -5624,6 +5643,8 @@ var YAxis = function () {
       if (w.config.yaxis[realIndex].labels.show) {
         for (var i = tickAmount; i >= 0; i--) {
           var val = w.globals.yAxisScale[realIndex].result[i];
+          var bothSide = w.config.yaxis[realIndex].bothSide;
+          var textAnchor = w.config.yaxis[realIndex].opposite ? 'start' : 'end';
 
           val = lbFormatter(val);
 
@@ -5640,20 +5661,37 @@ var YAxis = function () {
             x: xPad,
             y: l + tickAmount / 10 + w.config.yaxis[realIndex].labels.offsetY + 1,
             text: val,
-            textAnchor: w.config.yaxis[realIndex].opposite ? 'start' : 'end',
+            textAnchor: textAnchor,
             fontSize: yaxisFontSize,
             fontFamily: yaxisFontFamily,
             foreColor: w.config.yaxis[realIndex].labels.style.color,
             cssClass: 'apexcharts-yaxis-label ' + w.config.yaxis[realIndex].labels.style.cssClass
           });
+
           elYaxisTexts.add(label);
+
+          if (bothSide) {
+            var secondLabel = graphics.drawText({
+              x: xPad + w.globals.gridWidth + 25,
+              y: l + tickAmount / 10 + w.config.yaxis[realIndex].labels.offsetY + 1,
+              text: val,
+              textAnchor: textAnchor === 'end' ? 'start' : 'end',
+              fontSize: yaxisFontSize,
+              fontFamily: yaxisFontFamily,
+              foreColor: w.config.yaxis[realIndex].labels.style.color,
+              cssClass: 'apexcharts-yaxis-label apexcharts-yaxis-label-second' + w.config.yaxis[realIndex].labels.style.cssClass
+            });
+
+            elYaxisTextsSecond.add(secondLabel);
+          }
+
           l = l + labelsDivider;
         }
       }
 
       if (w.config.yaxis[realIndex].title.text !== undefined) {
         var elYaxisTitle = graphics.group({
-          'class': 'apexcharts-yaxis-title'
+          class: 'apexcharts-yaxis-title'
         });
 
         var x = 0;
@@ -5702,12 +5740,12 @@ var YAxis = function () {
       var graphics = new _Graphics2.default(this.ctx);
 
       var elXaxis = graphics.group({
-        'class': 'apexcharts-xaxis apexcharts-yaxis-inversed'
+        class: 'apexcharts-xaxis apexcharts-yaxis-inversed'
       });
 
       var elXaxisTexts = graphics.group({
-        'class': 'apexcharts-xaxis-texts-g',
-        'transform': 'translate(' + w.globals.translateXAxisX + ', ' + w.globals.translateXAxisY + ')'
+        class: 'apexcharts-xaxis-texts-g',
+        transform: 'translate(' + w.globals.translateXAxisX + ', ' + w.globals.translateXAxisY + ')'
       });
 
       elXaxis.add(elXaxisTexts);
@@ -5752,7 +5790,7 @@ var YAxis = function () {
 
       if (w.config.xaxis.title.text !== undefined) {
         var elYaxisTitle = graphics.group({
-          'class': 'apexcharts-xaxis-title apexcharts-yaxis-title-inversed'
+          class: 'apexcharts-xaxis-title apexcharts-yaxis-title-inversed'
         });
 
         var elYAxisTitleText = graphics.drawText({
