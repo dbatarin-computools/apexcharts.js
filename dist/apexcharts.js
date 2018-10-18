@@ -2941,10 +2941,7 @@ var Dimensions = function () {
 
       gl.gridWidth = gl.gridWidth - w.config.grid.padding.left - w.config.grid.padding.right;
 
-      console.log(w);
-
       if (w.config.yaxis && w.config.yaxis[0].bothSide) {
-        console.log('alo');
         gl.gridWidth -= yaxisLabelCoords[0].width;
       }
 
