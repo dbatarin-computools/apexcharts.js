@@ -20,7 +20,11 @@ class Filters {
     filter.size('120%', '180%', '-5%', '-40%')
 
     if (w.config.states.normal.filter !== 'none') {
-      this.applyFilter(el, w.config.states.normal.filter.type, w.config.states.normal.filter.value)
+      this.applyFilter(
+        el,
+        w.config.states.normal.filter.type,
+        w.config.states.normal.filter.value
+      )
     } else {
       if (w.config.chart.dropShadow.enabled) {
         this.dropShadow(el, w.config.chart.dropShadow)
@@ -43,17 +47,37 @@ class Filters {
     let filter = new window.SVG.Filter()
     filter.size('120%', '180%', '-5%', '-40%')
 
-    el.filter((add) => {
+    el.filter(add => {
       const shadowAttr = w.config.chart.dropShadow
       if (shadowAttr.enabled) {
         filter = this.addShadow(add, shadowAttr)
       } else {
         filter = add
       }
-      filter.colorMatrix('matrix', [ 0, 0, 0, 0, 0.5,
-        0, 0, 0, 0, 0.5,
-        0, 0, 0, 0, 0.5,
-        0, 0, 0, 1.0, 0 ]).colorMatrix('saturate', 0)
+      filter
+        .colorMatrix('matrix', [
+          0,
+          0,
+          0,
+          0,
+          0.5,
+          0,
+          0,
+          0,
+          0,
+          0.5,
+          0,
+          0,
+          0,
+          0,
+          0.5,
+          0,
+          0,
+          0,
+          1.0,
+          0
+        ])
+        .colorMatrix('saturate', 0)
     })
     el.filterer.node.setAttribute('filterUnits', 'userSpaceOnUse')
   }
@@ -72,7 +96,7 @@ class Filters {
     let filter = new window.SVG.Filter()
     filter.size('120%', '180%', '-5%', '-40%')
 
-    el.filter((add) => {
+    el.filter(add => {
       const shadowAttr = w.config.chart.dropShadow
       if (shadowAttr.enabled) {
         filter = this.addShadow(add, shadowAttr)
@@ -100,7 +124,7 @@ class Filters {
     let filter = new window.SVG.Filter()
     filter.size('120%', '180%', '-5%', '-40%')
 
-    el.filter((add) => {
+    el.filter(add => {
       const shadowAttr = w.config.chart.dropShadow
       if (shadowAttr.enabled) {
         filter = this.addShadow(add, shadowAttr)
@@ -146,14 +170,19 @@ class Filters {
   addShadow (add, attrs) {
     const { blur, top, left, opacity } = attrs
 
-    let shadowBlur = add.flood('black', opacity).composite(add.sourceAlpha, 'in').offset(left, top).gaussianBlur(blur).merge(add.source)
+    let shadowBlur = add
+      .flood('black', opacity)
+      .composite(add.sourceAlpha, 'in')
+      .offset(left, top)
+      .gaussianBlur(blur)
+      .merge(add.source)
     return add.blend(add.source, shadowBlur)
   }
 
   // directly adds dropShadow to the element and returns the same element.
   // the only way it is different from the addShadow() function is that addShadow is chainable to other filters, while this function discards all filters and add dropShadow
   dropShadow (el, attrs) {
-    let { top, left, blur, opacity } = attrs
+    let { top, left, blur, opacity, color } = attrs
 
     el.unfilter(true)
 
@@ -164,9 +193,18 @@ class Filters {
       let shadowBlur = null
       if (Utils.isSafari() || Utils.isFirefox() || Utils.isIE()) {
         // safari/firefox has some alternative way to use this filter
-        shadowBlur = add.flood('black', opacity).composite(add.sourceAlpha, 'in').offset(left, top).gaussianBlur(blur)
+        shadowBlur = add
+          .flood(color || 'black', opacity)
+          .composite(add.sourceAlpha, 'in')
+          .offset(left, top)
+          .gaussianBlur(blur)
       } else {
-        shadowBlur = add.flood('black', opacity).composite(add.sourceAlpha, 'in').offset(left, top).gaussianBlur(blur).merge(add.source)
+        shadowBlur = add
+          .flood(color || 'black', opacity)
+          .composite(add.sourceAlpha, 'in')
+          .offset(left, top)
+          .gaussianBlur(blur)
+          .merge(add.source)
       }
 
       add.blend(add.source, shadowBlur)

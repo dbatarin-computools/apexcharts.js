@@ -37,7 +37,18 @@ class Graphics {
     return line
   }
 
-  drawRect (x1 = 0, y1 = 0, x2 = 0, y2 = 0, radius = 0, color = '#fefefe', opacity = 1, strokeWidth = null, strokeColor = null, strokeDashArray = 0) {
+  drawRect (
+    x1 = 0,
+    y1 = 0,
+    x2 = 0,
+    y2 = 0,
+    radius = 0,
+    color = '#fefefe',
+    opacity = 1,
+    strokeWidth = null,
+    strokeColor = null,
+    strokeDashArray = 0
+  ) {
     let w = this.w
     let rect = w.globals.dom.Paper.rect()
 
@@ -50,7 +61,7 @@ class Graphics {
       ry: radius,
       fill: color,
       opacity: opacity,
-      'stroke-width': (strokeWidth !== null ? strokeWidth : 0),
+      'stroke-width': strokeWidth !== null ? strokeWidth : 0,
       stroke: strokeColor !== null ? strokeColor : 'none',
       'stroke-dasharray': strokeDashArray
     })
@@ -81,7 +92,9 @@ class Graphics {
   }) {
     let w = this.w
 
-    if (strokeLinecap === null) { strokeLinecap = w.config.stroke.lineCap }
+    if (strokeLinecap === null) {
+      strokeLinecap = w.config.stroke.lineCap
+    }
 
     if (d.indexOf('undefined') > -1 || d.indexOf('NaN') > -1) {
       d = `M 0 ${w.globals.gridHeight}`
@@ -182,11 +195,14 @@ class Graphics {
     const anim = new Animations(this.ctx)
 
     let initialAnim = this.w.config.chart.animations.enabled
-    let dynamicAnim = initialAnim && this.w.config.chart.animations.dynamicAnimation.enabled
+    let dynamicAnim =
+      initialAnim && this.w.config.chart.animations.dynamicAnimation.enabled
 
     let d
-    let shouldAnimate = !!((initialAnim && !w.globals.resized) ||
-        (dynamicAnim && w.globals.dataChanged))
+    let shouldAnimate = !!(
+      (initialAnim && !w.globals.resized) ||
+      (dynamicAnim && w.globals.dataChanged)
+    )
 
     if (shouldAnimate) {
       d = pathFrom
@@ -219,10 +235,18 @@ class Graphics {
     // const defaultFilter = el.filterer
 
     if (w.config.states.normal.filter.type !== 'none') {
-      filters.getDefaultFilter(el, w.config.states.normal.filter.type, w.config.states.normal.filter.value)
+      filters.getDefaultFilter(
+        el,
+        w.config.states.normal.filter.type,
+        w.config.states.normal.filter.value
+      )
     } else {
       if (w.config.chart.dropShadow.enabled) {
-        if (!w.config.chart.dropShadow.enabledSeries || (w.config.chart.dropShadow.enabledSeries && w.config.chart.dropShadow.enabledSeries.indexOf(realIndex) !== -1)) {
+        if (
+          !w.config.chart.dropShadow.enabledSeries ||
+          (w.config.chart.dropShadow.enabledSeries &&
+            w.config.chart.dropShadow.enabledSeries.indexOf(realIndex) !== -1)
+        ) {
           const shadow = w.config.chart.dropShadow
           filters.dropShadow(el, shadow)
         }
@@ -264,25 +288,37 @@ class Graphics {
     return el
   }
 
-  drawPattern (style, width, height, stroke = '#a8a8a8', strokeWidth = 0, opacity = 1) {
+  drawPattern (
+    style,
+    width,
+    height,
+    stroke = '#a8a8a8',
+    strokeWidth = 0,
+    opacity = 1
+  ) {
     let w = this.w
 
     let p = w.globals.dom.Paper.pattern(width, height, function (add) {
       if (style === 'horizontalLines') {
-        add.line(0, 0, height, 0)
+        add
+          .line(0, 0, height, 0)
           .stroke({ color: stroke, width: strokeWidth + 1 })
       } else if (style === 'verticalLines') {
-        add.line(0, 0, 0, width)
+        add
+          .line(0, 0, 0, width)
           .stroke({ color: stroke, width: strokeWidth + 1 })
       } else if (style === 'slantedLines') {
-        add.line(0, 0, width, height)
+        add
+          .line(0, 0, width, height)
           .stroke({ color: stroke, width: strokeWidth })
       } else if (style === 'squares') {
-        add.rect(width, height)
+        add
+          .rect(width, height)
           .fill('none')
           .stroke({ color: stroke, width: strokeWidth })
       } else if (style === 'circles') {
-        add.circle(width)
+        add
+          .circle(width)
           .fill('none')
           .stroke({ color: stroke, width: strokeWidth })
       }
@@ -310,20 +346,25 @@ class Graphics {
     let stop3 = 1
 
     if (stops !== null) {
-      stop1 = typeof (stops[0]) !== 'undefined' ? stops[0] / 100 : 0
-      stop2 = typeof (stops[1]) !== 'undefined' ? stops[1] / 100 : 1
-      stop3 = typeof (stops[2]) !== 'undefined' ? stops[2] / 100 : 1
+      stop1 = typeof stops[0] !== 'undefined' ? stops[0] / 100 : 0
+      stop2 = typeof stops[1] !== 'undefined' ? stops[1] / 100 : 1
+      stop3 = typeof stops[2] !== 'undefined' ? stops[2] / 100 : 1
     }
 
-    let radial = !!(w.config.chart.type === 'donut' ||
+    let radial = !!(
+      w.config.chart.type === 'donut' ||
       w.config.chart.type === 'pie' ||
-      w.config.chart.type === 'bubble')
+      w.config.chart.type === 'bubble'
+    )
 
-    const p = w.globals.dom.Paper.gradient(radial ? 'radial' : 'linear', function (stop) {
-      stop.at(stop1, gfrom, opacityFrom)
-      stop.at(stop2, gto, opacityTo)
-      stop.at(stop3, gto, opacityTo)
-    })
+    const p = w.globals.dom.Paper.gradient(
+      radial ? 'radial' : 'linear',
+      function (stop) {
+        stop.at(stop1, gfrom, opacityFrom)
+        stop.at(stop2, gto, opacityTo)
+        stop.at(stop3, gto, opacityTo)
+      }
+    )
 
     if (!radial) {
       if (style === 'vertical') {
@@ -341,7 +382,7 @@ class Graphics {
 
       if (w.config.chart.type !== 'bubble') {
         p.attr({
-          'gradientUnits': 'userSpaceOnUse',
+          gradientUnits: 'userSpaceOnUse',
           cx: offx,
           cy: offy,
           r: size
@@ -375,7 +416,7 @@ class Graphics {
 
     let elText
     if (Array.isArray(text)) {
-      elText = w.globals.dom.Paper.text((add) => {
+      elText = w.globals.dom.Paper.text(add => {
         for (let i = 0; i < text.length; i++) {
           add.tspan(text[i])
         }
@@ -399,7 +440,7 @@ class Graphics {
     return elText
   }
 
-  drawMarker (x, y, opts) {
+  drawMarker (x, y, opts, additional = {}) {
     x = x || 0
     let size = opts.pSize || 0
 
@@ -413,7 +454,7 @@ class Graphics {
         radius = 0
       }
 
-      let nSize = (size * 1.2) + radius
+      let nSize = size * 1.2 + radius
 
       let p = this.drawRect(nSize, nSize, nSize, nSize, radius)
 
@@ -447,7 +488,8 @@ class Graphics {
         fill: opts.pointFillColor,
         'fill-opacity': opts.pointFillOpacity ? opts.pointFillOpacity : 1,
         'stroke-width': opts.pWidth ? opts.pWidth : 0,
-        'stroke-opacity': opts.pointStrokeOpacity ? opts.pointStrokeOpacity : 1
+        'stroke-opacity': opts.pointStrokeOpacity ? opts.pointStrokeOpacity : 1,
+        ...additional
       })
     }
 
@@ -504,10 +546,16 @@ class Graphics {
         w.globals.selectedDataPoints[i].splice(index, 1)
       }
     } else {
-      if (!w.config.states.active.allowMultipleDataPointsSelection && w.globals.selectedDataPoints.length > 0) {
+      if (
+        !w.config.states.active.allowMultipleDataPointsSelection &&
+        w.globals.selectedDataPoints.length > 0
+      ) {
         w.globals.selectedDataPoints = []
-        const elPaths = w.globals.dom.Paper.select('.apexcharts-series path').members
-        const elCircles = w.globals.dom.Paper.select('.apexcharts-series circle').members
+        const elPaths = w.globals.dom.Paper.select('.apexcharts-series path')
+          .members
+        const elCircles = w.globals.dom.Paper.select(
+          '.apexcharts-series circle'
+        ).members
 
         for (const elPath of elPaths) {
           elPath.node.setAttribute('selected', 'false')
@@ -523,7 +571,7 @@ class Graphics {
       path.node.setAttribute('selected', 'true')
       selected = 'true'
 
-      if (typeof (w.globals.selectedDataPoints[i]) === 'undefined') {
+      if (typeof w.globals.selectedDataPoints[i] === 'undefined') {
         w.globals.selectedDataPoints[i] = []
       }
       w.globals.selectedDataPoints[i].push(j)
@@ -535,18 +583,50 @@ class Graphics {
         filters.applyFilter(path, activeFilter.type, activeFilter.value)
 
         if (typeof w.config.chart.events.dataPointSelection === 'function') {
-          w.config.chart.events.dataPointSelection(e, this.ctx, { selectedDataPoints: w.globals.selectedDataPoints, seriesIndex: i, dataPointIndex: j, config: w.config, globals: w.globals })
+          w.config.chart.events.dataPointSelection(e, this.ctx, {
+            selectedDataPoints: w.globals.selectedDataPoints,
+            seriesIndex: i,
+            dataPointIndex: j,
+            config: w.config,
+            globals: w.globals
+          })
         }
-        this.ctx.fireEvent('dataPointSelection', [e, this.ctx, { selectedDataPoints: w.globals.selectedDataPoints, seriesIndex: i, dataPointIndex: j, config: w.config, globals: w.globals }])
+        this.ctx.fireEvent('dataPointSelection', [
+          e,
+          this.ctx,
+          {
+            selectedDataPoints: w.globals.selectedDataPoints,
+            seriesIndex: i,
+            dataPointIndex: j,
+            config: w.config,
+            globals: w.globals
+          }
+        ])
       }
     } else {
       if (w.config.states.active.filter.type !== 'none') {
         filters.getDefaultFilter(path)
       }
       if (typeof w.config.chart.events.dataPointSelection === 'function') {
-        w.config.chart.events.dataPointSelection(e, this.ctx, { selectedDataPoints: w.globals.selectedDataPoints, seriesIndex: i, dataPointIndex: j, config: w.config, globals: w.globals })
+        w.config.chart.events.dataPointSelection(e, this.ctx, {
+          selectedDataPoints: w.globals.selectedDataPoints,
+          seriesIndex: i,
+          dataPointIndex: j,
+          config: w.config,
+          globals: w.globals
+        })
       }
-      this.ctx.fireEvent('dataPointSelection', [e, this.ctx, { selectedDataPoints: w.globals.selectedDataPoints, seriesIndex: i, dataPointIndex: j, config: w.config, globals: w.globals }])
+      this.ctx.fireEvent('dataPointSelection', [
+        e,
+        this.ctx,
+        {
+          selectedDataPoints: w.globals.selectedDataPoints,
+          seriesIndex: i,
+          dataPointIndex: j,
+          config: w.config,
+          globals: w.globals
+        }
+      ])
     }
 
     if (this.w.config.chart.selection.selectedPoints !== undefined) {

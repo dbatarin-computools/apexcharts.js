@@ -34,7 +34,11 @@ class Markers {
         let realIndexP = j
 
         let PointClasses = 'apexcharts-marker'
-        if (((w.config.chart.type === 'line' || w.config.chart.type === 'area') && !w.globals.comboCharts) && !w.config.tooltip.intersect) {
+        if (
+          (w.config.chart.type === 'line' || w.config.chart.type === 'area') &&
+          !w.globals.comboCharts &&
+          !w.config.tooltip.intersect
+        ) {
           PointClasses += ' no-pointer-events'
         }
 
@@ -54,27 +58,42 @@ class Markers {
             }
           })
 
-          point = graphics.drawMarker(
-            p.x[q],
-            p.y[q],
-            opts
-          )
-
           // a small hack as we have 2 points for the first val to connect it
           if (j === 1 && q === 0) realIndexP = 0
           if (j === 1 && q === 1) realIndexP = 1
+
+          let oMarker
+
+          try {
+            oMarker =
+              w.globals.initialConfig.series[seriesIndex].data[realIndexP]
+            if (oMarker.markerStyles) {
+              Object.assign(opts, oMarker.markerStyles)
+            }
+          } catch (e) {
+            oMarker = {}
+          }
+
+          point = graphics.drawMarker(p.x[q], p.y[q], opts, oMarker.additional)
 
           point.attr('rel', realIndexP)
           point.attr('j', realIndexP)
           point.attr('index', seriesIndex)
 
           this.setSelectedPointFilter(point, seriesIndex, realIndexP)
+
+          if (oMarker.shadow) {
+            this.addFilter(point, oMarker.shadow)
+          }
+
           this.addEvents(point)
 
           elPointsWrap.add(point)
         } else {
           // dynamic array creation - multidimensional
-          if (typeof (w.globals.pointsArray[seriesIndex]) === 'undefined') w.globals.pointsArray[seriesIndex] = []
+          if (typeof w.globals.pointsArray[seriesIndex] === 'undefined') {
+            w.globals.pointsArray[seriesIndex] = []
+          }
 
           w.globals.pointsArray[seriesIndex].push([p.x[q], p.y[q]])
         }
@@ -91,12 +110,15 @@ class Markers {
     const pSize = w.config.markers.size
 
     return {
-      pSize: (pSize instanceof Array ? pSize[seriesIndex] : pSize),
+      pSize: pSize instanceof Array ? pSize[seriesIndex] : pSize,
       pRadius: w.config.markers.radius,
       pWidth: w.config.markers.strokeWidth,
       pointStrokeColor: pStyle.pointStrokeColor,
       pointFillColor: pStyle.pointFillColor,
-      shape: (w.config.markers.shape instanceof Array ? w.config.markers.shape[seriesIndex] : w.config.markers.shape),
+      shape:
+        w.config.markers.shape instanceof Array
+          ? w.config.markers.shape[seriesIndex]
+          : w.config.markers.shape,
       class: cssClass,
       pointStrokeOpacity: w.config.markers.strokeOpacity,
       pointFillOpacity: w.config.markers.fillOpacity,
@@ -126,9 +148,12 @@ class Markers {
     )
   }
 
-  setSelectedPointFilter (circle, realIndex, realIndexP) {
+  setSelectedPointFilter (circle, realIndex, realIndexP, force) {
     const w = this.w
-    if (typeof w.globals.selectedDataPoints[realIndex] !== 'undefined') {
+    if (
+      typeof w.globals.selectedDataPoints[realIndex] !== 'undefined' ||
+      force
+    ) {
       if (w.globals.selectedDataPoints[realIndex].includes(realIndexP)) {
         circle.node.setAttribute('selected', true)
         let activeFilter = w.config.states.active.filter
@@ -140,16 +165,22 @@ class Markers {
     }
   }
 
+  addFilter (circle, shadow) {
+    const filters = new Filters(this.ctx)
+    filters.dropShadow(circle, shadow)
+  }
+
   getMarkerStyle (seriesIndex) {
     let w = this.w
 
     let colors = w.globals.markers.colors
 
     let pointStrokeColor = w.config.markers.strokeColor
-    let pointFillColor = (colors instanceof Array ? colors[seriesIndex] : colors)
+    let pointFillColor = colors instanceof Array ? colors[seriesIndex] : colors
 
     return {
-      pointStrokeColor, pointFillColor
+      pointStrokeColor,
+      pointFillColor
     }
   }
 }

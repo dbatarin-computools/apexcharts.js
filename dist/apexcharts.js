@@ -87,6 +87,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Utils = __webpack_require__(1);
@@ -473,7 +475,7 @@ var Graphics = function () {
 
         if (w.config.chart.type !== 'bubble') {
           p.attr({
-            'gradientUnits': 'userSpaceOnUse',
+            gradientUnits: 'userSpaceOnUse',
             cx: offx,
             cy: offy,
             r: size
@@ -541,6 +543,8 @@ var Graphics = function () {
   }, {
     key: 'drawMarker',
     value: function drawMarker(x, y, opts) {
+      var additional = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+
       x = x || 0;
       var size = opts.pSize || 0;
 
@@ -580,7 +584,7 @@ var Graphics = function () {
 
         // let nSize = size - opts.pRadius / 2 < 0 ? 0 : size - opts.pRadius / 2
 
-        elPoint = this.drawCircle(size, {
+        elPoint = this.drawCircle(size, _extends({
           cx: x,
           cy: y,
           class: opts.class ? opts.class : '',
@@ -589,7 +593,7 @@ var Graphics = function () {
           'fill-opacity': opts.pointFillOpacity ? opts.pointFillOpacity : 1,
           'stroke-width': opts.pWidth ? opts.pWidth : 0,
           'stroke-opacity': opts.pointStrokeOpacity ? opts.pointStrokeOpacity : 1
-        });
+        }, additional));
       }
 
       return elPoint;
@@ -721,18 +725,42 @@ var Graphics = function () {
           filters.applyFilter(path, activeFilter.type, activeFilter.value);
 
           if (typeof w.config.chart.events.dataPointSelection === 'function') {
-            w.config.chart.events.dataPointSelection(e, this.ctx, { selectedDataPoints: w.globals.selectedDataPoints, seriesIndex: i, dataPointIndex: j, config: w.config, globals: w.globals });
+            w.config.chart.events.dataPointSelection(e, this.ctx, {
+              selectedDataPoints: w.globals.selectedDataPoints,
+              seriesIndex: i,
+              dataPointIndex: j,
+              config: w.config,
+              globals: w.globals
+            });
           }
-          this.ctx.fireEvent('dataPointSelection', [e, this.ctx, { selectedDataPoints: w.globals.selectedDataPoints, seriesIndex: i, dataPointIndex: j, config: w.config, globals: w.globals }]);
+          this.ctx.fireEvent('dataPointSelection', [e, this.ctx, {
+            selectedDataPoints: w.globals.selectedDataPoints,
+            seriesIndex: i,
+            dataPointIndex: j,
+            config: w.config,
+            globals: w.globals
+          }]);
         }
       } else {
         if (w.config.states.active.filter.type !== 'none') {
           filters.getDefaultFilter(path);
         }
         if (typeof w.config.chart.events.dataPointSelection === 'function') {
-          w.config.chart.events.dataPointSelection(e, this.ctx, { selectedDataPoints: w.globals.selectedDataPoints, seriesIndex: i, dataPointIndex: j, config: w.config, globals: w.globals });
+          w.config.chart.events.dataPointSelection(e, this.ctx, {
+            selectedDataPoints: w.globals.selectedDataPoints,
+            seriesIndex: i,
+            dataPointIndex: j,
+            config: w.config,
+            globals: w.globals
+          });
         }
-        this.ctx.fireEvent('dataPointSelection', [e, this.ctx, { selectedDataPoints: w.globals.selectedDataPoints, seriesIndex: i, dataPointIndex: j, config: w.config, globals: w.globals }]);
+        this.ctx.fireEvent('dataPointSelection', [e, this.ctx, {
+          selectedDataPoints: w.globals.selectedDataPoints,
+          seriesIndex: i,
+          dataPointIndex: j,
+          config: w.config,
+          globals: w.globals
+        }]);
       }
 
       if (this.w.config.chart.selection.selectedPoints !== undefined) {
@@ -1490,7 +1518,8 @@ var Filters = function () {
       var top = attrs.top,
           left = attrs.left,
           blur = attrs.blur,
-          opacity = attrs.opacity;
+          opacity = attrs.opacity,
+          color = attrs.color;
 
 
       el.unfilter(true);
@@ -1502,9 +1531,9 @@ var Filters = function () {
         var shadowBlur = null;
         if (_Utils2.default.isSafari() || _Utils2.default.isFirefox() || _Utils2.default.isIE()) {
           // safari/firefox has some alternative way to use this filter
-          shadowBlur = add.flood('black', opacity).composite(add.sourceAlpha, 'in').offset(left, top).gaussianBlur(blur);
+          shadowBlur = add.flood(color || 'black', opacity).composite(add.sourceAlpha, 'in').offset(left, top).gaussianBlur(blur);
         } else {
-          shadowBlur = add.flood('black', opacity).composite(add.sourceAlpha, 'in').offset(left, top).gaussianBlur(blur).merge(add.source);
+          shadowBlur = add.flood(color || 'black', opacity).composite(add.sourceAlpha, 'in').offset(left, top).gaussianBlur(blur).merge(add.source);
         }
 
         add.blend(add.source, shadowBlur);
@@ -4922,23 +4951,41 @@ var Markers = function () {
               }
             });
 
-            point = graphics.drawMarker(p.x[q], p.y[q], opts);
-
             // a small hack as we have 2 points for the first val to connect it
             if (j === 1 && q === 0) realIndexP = 0;
             if (j === 1 && q === 1) realIndexP = 1;
+
+            var oMarker = void 0;
+
+            try {
+              oMarker = w.globals.initialConfig.series[seriesIndex].data[realIndexP];
+              if (oMarker.markerStyles) {
+                Object.assign(opts, oMarker.markerStyles);
+              }
+            } catch (e) {
+              oMarker = {};
+            }
+
+            point = graphics.drawMarker(p.x[q], p.y[q], opts, oMarker.additional);
 
             point.attr('rel', realIndexP);
             point.attr('j', realIndexP);
             point.attr('index', seriesIndex);
 
             _this.setSelectedPointFilter(point, seriesIndex, realIndexP);
+
+            if (oMarker.shadow) {
+              _this.addFilter(point, oMarker.shadow);
+            }
+
             _this.addEvents(point);
 
             elPointsWrap.add(point);
           } else {
             // dynamic array creation - multidimensional
-            if (typeof w.globals.pointsArray[seriesIndex] === 'undefined') w.globals.pointsArray[seriesIndex] = [];
+            if (typeof w.globals.pointsArray[seriesIndex] === 'undefined') {
+              w.globals.pointsArray[seriesIndex] = [];
+            }
 
             w.globals.pointsArray[seriesIndex].push([p.x[q], p.y[q]]);
           }
@@ -4985,9 +5032,9 @@ var Markers = function () {
     }
   }, {
     key: 'setSelectedPointFilter',
-    value: function setSelectedPointFilter(circle, realIndex, realIndexP) {
+    value: function setSelectedPointFilter(circle, realIndex, realIndexP, force) {
       var w = this.w;
-      if (typeof w.globals.selectedDataPoints[realIndex] !== 'undefined') {
+      if (typeof w.globals.selectedDataPoints[realIndex] !== 'undefined' || force) {
         if (w.globals.selectedDataPoints[realIndex].includes(realIndexP)) {
           circle.node.setAttribute('selected', true);
           var activeFilter = w.config.states.active.filter;
@@ -4997,6 +5044,12 @@ var Markers = function () {
           }
         }
       }
+    }
+  }, {
+    key: 'addFilter',
+    value: function addFilter(circle, shadow) {
+      var filters = new _Filters2.default(this.ctx);
+      filters.dropShadow(circle, shadow);
     }
   }, {
     key: 'getMarkerStyle',
@@ -5009,7 +5062,8 @@ var Markers = function () {
       var pointFillColor = colors instanceof Array ? colors[seriesIndex] : colors;
 
       return {
-        pointStrokeColor: pointStrokeColor, pointFillColor: pointFillColor
+        pointStrokeColor: pointStrokeColor,
+        pointFillColor: pointFillColor
       };
     }
   }]);
@@ -14008,7 +14062,7 @@ var Line = function () {
         var longestSeries = series[i].length === w.globals.dataPoints;
         elSeries.attr({
           'data:longestSeries': longestSeries,
-          'rel': i + 1,
+          rel: i + 1,
           'data:realIndex': realIndex
         });
 
@@ -14058,7 +14112,11 @@ var Line = function () {
         pathFromArea = graphics.move(-1, zeroY) + graphics.line(-1, zeroY);
 
         if (w.globals.previousPaths.length > 0) {
-          var pathFrom = this.checkPreviousPaths({ pathFromLine: pathFromLine, pathFromArea: pathFromArea, realIndex: realIndex });
+          var pathFrom = this.checkPreviousPaths({
+            pathFromLine: pathFromLine,
+            pathFromArea: pathFromArea,
+            realIndex: realIndex
+          });
           pathFromLine = pathFrom.pathFromLine;
           pathFromArea = pathFrom.pathFromArea;
         }
@@ -14139,6 +14197,7 @@ var Line = function () {
 
           if (!this.pointsChart) {
             var markers = new _Markers2.default(this.ctx);
+
             var elPointsWrap = markers.plotChartMarkers(pointsPos, realIndex, j + 1);
             if (elPointsWrap !== null) {
               elPointsMain.add(elPointsWrap);
@@ -14169,7 +14228,10 @@ var Line = function () {
 
         // these elements will be shown after area path animation completes
         if (!this.pointsChart) {
-          w.globals.delayedElements.push({ el: elPointsMain.node, index: realIndex });
+          w.globals.delayedElements.push({
+            el: elPointsMain.node,
+            index: realIndex
+          });
         }
 
         if (w.config.stroke.show && !this.pointsChart) {
@@ -20764,9 +20826,10 @@ var Marker = function () {
 
       for (var p = 0; p < points.length; p++) {
         var rel = points[p].getAttribute('rel');
+        var disableEnlarge = points[p].getAttribute('disableEnlarge') === 'true';
 
         if (col === parseInt(rel)) {
-          me.newPointSize(col, points[p]);
+          !disableEnlarge && me.newPointSize(col, points[p]);
 
           var cx = points[p].getAttribute('cx');
           var cy = points[p].getAttribute('cy');
@@ -20777,7 +20840,7 @@ var Marker = function () {
             me.tooltipPosition.moveTooltip(cx, cy, newSize);
           }
         } else {
-          me.oldPointSize(points[p]);
+          !disableEnlarge && me.oldPointSize(points[p]);
         }
       }
     }
@@ -20815,7 +20878,8 @@ var Marker = function () {
 
       var points = w.globals.dom.baseEl.querySelectorAll('.apexcharts-marker');
       for (var p = 0; p < points.length; p++) {
-        points[p].setAttribute('r', currSize);
+        var disableReset = points[p].getAttribute('disableReset') === 'true';
+        !disableReset && points[p].setAttribute('r', currSize);
         // points[p].style.opacity = w.config.markers.opacity;
       }
     }

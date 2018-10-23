@@ -17,8 +17,10 @@ class Line {
 
     this.xyRatios = xyRatios
 
-    this.pointsChart = !(this.w.config.chart.type !== 'bubble' &&
-      this.w.config.chart.type !== 'scatter')
+    this.pointsChart = !(
+      this.w.config.chart.type !== 'bubble' &&
+      this.w.config.chart.type !== 'scatter'
+    )
 
     if (this.pointsChart) {
       this.scatter = new Scatter(this.ctx)
@@ -109,7 +111,7 @@ class Line {
       let longestSeries = series[i].length === w.globals.dataPoints
       elSeries.attr({
         'data:longestSeries': longestSeries,
-        'rel': i + 1,
+        rel: i + 1,
         'data:realIndex': realIndex
       })
 
@@ -144,7 +146,7 @@ class Line {
         for (let s = 0; s < series[i].length; s++) {
           if (series[i][s] !== null) {
             prevX = xDivision * s
-            prevY = (zeroY - series[i][s] / yRatio[this.yaxisIndex])
+            prevY = zeroY - series[i][s] / yRatio[this.yaxisIndex]
             linePath = graphics.move(prevX, prevY)
             areaPath = graphics.move(prevX, zeroY)
             break
@@ -159,7 +161,11 @@ class Line {
       pathFromArea = graphics.move(-1, zeroY) + graphics.line(-1, zeroY)
 
       if (w.globals.previousPaths.length > 0) {
-        const pathFrom = this.checkPreviousPaths({ pathFromLine, pathFromArea, realIndex })
+        const pathFrom = this.checkPreviousPaths({
+          pathFromLine,
+          pathFromArea,
+          realIndex
+        })
         pathFromLine = pathFrom.pathFromLine
         pathFromArea = pathFrom.pathFromArea
       }
@@ -182,16 +188,22 @@ class Line {
             lineYPosition = zeroY
           }
 
-          if (typeof series[i][j + 1] === 'undefined' || series[i][j + 1] === null) {
+          if (
+            typeof series[i][j + 1] === 'undefined' ||
+            series[i][j + 1] === null
+          ) {
             y = lineYPosition - 1 / yRatio[this.yaxisIndex]
           } else {
-            y = (lineYPosition - series[i][j + 1] / yRatio[this.yaxisIndex])
+            y = lineYPosition - series[i][j + 1] / yRatio[this.yaxisIndex]
           }
         } else {
-          if (typeof series[i][j + 1] === 'undefined' || series[i][j + 1] === null) {
+          if (
+            typeof series[i][j + 1] === 'undefined' ||
+            series[i][j + 1] === null
+          ) {
             y = zeroY - 1 / yRatio[this.yaxisIndex]
           } else {
-            y = (zeroY - series[i][j + 1] / yRatio[this.yaxisIndex])
+            y = zeroY - series[i][j + 1] / yRatio[this.yaxisIndex]
           }
         }
 
@@ -243,7 +255,12 @@ class Line {
 
         if (!this.pointsChart) {
           let markers = new Markers(this.ctx)
-          let elPointsWrap = markers.plotChartMarkers(pointsPos, realIndex, j + 1)
+
+          let elPointsWrap = markers.plotChartMarkers(
+            pointsPos,
+            realIndex,
+            j + 1
+          )
           if (elPointsWrap !== null) {
             elPointsMain.add(elPointsWrap)
           }
@@ -273,7 +290,10 @@ class Line {
 
       // these elements will be shown after area path animation completes
       if (!this.pointsChart) {
-        w.globals.delayedElements.push({el: elPointsMain.node, index: realIndex})
+        w.globals.delayedElements.push({
+          el: elPointsMain.node,
+          index: realIndex
+        })
       }
 
       if (w.config.stroke.show && !this.pointsChart) {
@@ -295,7 +315,9 @@ class Line {
             pathFrom: pathFromLine,
             pathTo: linePaths[p],
             stroke: lineFill,
-            strokeWidth: Array.isArray(w.config.stroke.width) ? w.config.stroke.width[realIndex] : w.config.stroke.width,
+            strokeWidth: Array.isArray(w.config.stroke.width)
+              ? w.config.stroke.width[realIndex]
+              : w.config.stroke.width,
             strokeLineCap: w.config.stroke.lineCap,
             fill: 'none',
             animationDelay: i,
@@ -392,8 +414,10 @@ class Line {
         linePaths.push(linePath)
         areaPaths.push(areaPath)
       } else {
-        linePath = linePath + graphics.curve(pX + length, pY, x - length, y, x, y)
-        areaPath = areaPath + graphics.curve(pX + length, pY, x - length, y, x, y)
+        linePath =
+          linePath + graphics.curve(pX + length, pY, x - length, y, x, y)
+        areaPath =
+          areaPath + graphics.curve(pX + length, pY, x - length, y, x, y)
       }
 
       pX = x
@@ -401,7 +425,8 @@ class Line {
 
       if (j === series[i].length - 2) {
         // last loop, close path
-        areaPath = areaPath + graphics.curve(pX, zeroY, x, zeroY, x, zeroY) + 'z'
+        areaPath =
+          areaPath + graphics.curve(pX, zeroY, x, zeroY, x, zeroY) + 'z'
         if (!w.globals.hasNullValues) {
           linePaths.push(linePath)
           areaPaths.push(areaPath)
@@ -410,7 +435,8 @@ class Line {
     } else {
       if (series[i][j + 1] === null) {
         linePath = linePath + graphics.move(x, y)
-        areaPath = areaPath + graphics.line(x - xDivision, zeroY) + graphics.move(x, y)
+        areaPath =
+          areaPath + graphics.line(x - xDivision, zeroY) + graphics.move(x, y)
       }
       if (series[i][j] === null) {
         linePath = linePath + graphics.move(x, y)
@@ -466,18 +492,12 @@ class Line {
 
       // push 2 points for the first data values
       ptX.push(xPT1st)
-      ptY.push(
-        series[i][0] !== null ? prevY + w.config.markers.offsetY : null
-      )
+      ptY.push(series[i][0] !== null ? prevY + w.config.markers.offsetY : null)
       ptX.push(x + w.config.markers.offsetX)
-      ptY.push(
-        series[i][j + 1] !== null ? y + w.config.markers.offsetY : null
-      )
+      ptY.push(series[i][j + 1] !== null ? y + w.config.markers.offsetY : null)
     } else {
       ptX.push(x + w.config.markers.offsetX)
-      ptY.push(
-        series[i][j + 1] !== null ? y + w.config.markers.offsetY : null
-      )
+      ptY.push(series[i][j + 1] !== null ? y + w.config.markers.offsetY : null)
     }
 
     let pointsPos = {
@@ -495,7 +515,8 @@ class Line {
       let gpp = w.globals.previousPaths[pp]
 
       if (
-        (gpp.type === 'line' || gpp.type === 'area') && gpp.paths.length > 0 &&
+        (gpp.type === 'line' || gpp.type === 'area') &&
+        gpp.paths.length > 0 &&
         parseInt(gpp.realIndex) === parseInt(realIndex)
       ) {
         if (gpp.type === 'line') {
@@ -534,9 +555,9 @@ class Line {
           // the first series will not have prevY values
           lineYPosition = zeroY
         }
-        prevY = (lineYPosition - series[i][0] / yRatio)
+        prevY = lineYPosition - series[i][0] / yRatio
       } else {
-        prevY = (zeroY - series[i][0] / yRatio)
+        prevY = zeroY - series[i][0] / yRatio
       }
     } else {
       // the first value in the current series is null
@@ -547,9 +568,12 @@ class Line {
           if (typeof series[i][0] === 'undefined') {
             for (let s = i - 1; s >= 0; s--) {
               // for loop to get to 1st previous value until we get it
-              if (series[s][0] !== null && typeof series[s][0] !== 'undefined') {
+              if (
+                series[s][0] !== null &&
+                typeof series[s][0] !== 'undefined'
+              ) {
                 lineYPosition = prevSeriesY[s][0]
-                prevY = (lineYPosition)
+                prevY = lineYPosition
                 break
               }
             }

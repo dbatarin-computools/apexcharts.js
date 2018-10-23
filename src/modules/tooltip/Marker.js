@@ -23,9 +23,7 @@ class Marker {
     let graphics = new Graphics(this.ctx)
     let marker = new Markers(this.ctx)
 
-    let elsSeries = w.globals.dom.baseEl.querySelectorAll(
-      '.apexcharts-series'
-    )
+    let elsSeries = w.globals.dom.baseEl.querySelectorAll('.apexcharts-series')
 
     for (let i = 0; i < elsSeries.length; i++) {
       let seriesIndex = parseInt(elsSeries[i].getAttribute('data:realIndex'))
@@ -38,8 +36,14 @@ class Marker {
         // it can be null as we have tooltips in donut/bar charts
         let point
 
-        let PointClasses = `apexcharts-marker w${(Math.random() + 1).toString(36).substring(4)}`
-        if (((w.config.chart.type === 'line' || w.config.chart.type === 'area') && !w.globals.comboCharts) && !w.config.tooltip.intersect) {
+        let PointClasses = `apexcharts-marker w${(Math.random() + 1)
+          .toString(36)
+          .substring(4)}`
+        if (
+          (w.config.chart.type === 'line' || w.config.chart.type === 'area') &&
+          !w.globals.comboCharts &&
+          !w.config.tooltip.intersect
+        ) {
           PointClasses += ' no-pointer-events'
         }
 
@@ -73,11 +77,7 @@ class Marker {
     this.tooltipPosition.moveXCrosshairs(cx)
 
     if (!this.fixedTooltip) {
-      this.tooltipPosition.moveTooltip(
-        cx,
-        cy,
-        w.config.markers.hover.size
-      )
+      this.tooltipPosition.moveTooltip(cx, cy, w.config.markers.hover.size)
     }
   }
 
@@ -88,17 +88,16 @@ class Marker {
 
     let col = j
 
-    let points = w.globals.dom.baseEl.querySelectorAll(
-      '.apexcharts-marker'
-    )
+    let points = w.globals.dom.baseEl.querySelectorAll('.apexcharts-marker')
 
     let newSize = w.config.markers.hover.size
 
     for (let p = 0; p < points.length; p++) {
       let rel = points[p].getAttribute('rel')
+      let disableEnlarge = points[p].getAttribute('disableEnlarge') === 'true'
 
       if (col === parseInt(rel)) {
-        me.newPointSize(col, points[p])
+        !disableEnlarge && me.newPointSize(col, points[p])
 
         let cx = points[p].getAttribute('cx')
         let cy = points[p].getAttribute('cy')
@@ -109,7 +108,7 @@ class Marker {
           me.tooltipPosition.moveTooltip(cx, cy, newSize)
         }
       } else {
-        me.oldPointSize(points[p])
+        !disableEnlarge && me.oldPointSize(points[p])
       }
     }
   }
@@ -142,11 +141,10 @@ class Marker {
 
     let currSize = w.config.markers.size
 
-    let points = w.globals.dom.baseEl.querySelectorAll(
-      '.apexcharts-marker'
-    )
+    let points = w.globals.dom.baseEl.querySelectorAll('.apexcharts-marker')
     for (let p = 0; p < points.length; p++) {
-      points[p].setAttribute('r', currSize)
+      let disableReset = points[p].getAttribute('disableReset') === 'true'
+      !disableReset && points[p].setAttribute('r', currSize)
       // points[p].style.opacity = w.config.markers.opacity;
     }
   }
