@@ -20851,6 +20851,10 @@ var Marker = function () {
       var newSize = w.config.markers.hover.size;
       var elPoint = null;
 
+      if (point.getAttribute('hoverSize')) {
+        newSize = parseInt(point.getAttribute('hoverSize'), 10);
+      }
+
       if (rel === 0) {
         elPoint = point.parentNode.firstChild;
       } else {
@@ -20865,6 +20869,10 @@ var Marker = function () {
     value: function oldPointSize(point) {
       var w = this.w;
       var currSize = w.config.markers.size;
+
+      if (point.getAttribute('normalSize')) {
+        currSize = parseInt(point.getAttribute('normalSize'), 10);
+      }
 
       point.setAttribute('r', currSize);
       // point.style.opacity = w.config.markers.opacity

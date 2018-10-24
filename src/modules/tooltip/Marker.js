@@ -118,6 +118,10 @@ class Marker {
     let newSize = w.config.markers.hover.size
     let elPoint = null
 
+    if (point.getAttribute('hoverSize')) {
+      newSize = parseInt(point.getAttribute('hoverSize'), 10)
+    }
+
     if (rel === 0) {
       elPoint = point.parentNode.firstChild
     } else {
@@ -131,6 +135,10 @@ class Marker {
   oldPointSize (point) {
     let w = this.w
     let currSize = w.config.markers.size
+
+    if (point.getAttribute('normalSize')) {
+      currSize = parseInt(point.getAttribute('normalSize'), 10)
+    }
 
     point.setAttribute('r', currSize)
     // point.style.opacity = w.config.markers.opacity
